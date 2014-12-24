@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Demo with jQuery ajax Uploading files</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	    <meta name="description" content="Demo project with jQuery">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+		<style type="text/css"></style>
+	</head>
+	<body>
+		<form id="lr-ci-upload-form" action="#" method="post" enctype="multipart/form-data">
+			<input name="images[]" type="file" id="lr-ci-upload-files" multiple /> <br />
+			<p style="display:none;" id="ajax-result">
+				hidden
+			</p>
+			<input type="submit" name="submit" value="Upload Images" id="lr-ci-upload-btn" style="width:150px"/>
+		</form>
+	</body>
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script>
+			jQuery(document).ready(function(){
+				console.log("ready");
+
+				var upload_form = document.getElementById('lr-ci-upload-form');
+				var fileSelect = document.getElementById('lr-ci-upload-files');
+				var uploadButton = document.getElementById('lr-ci-upload-btn');
+
+				upload_form.onsubmit = function(event) {
+					event.preventDefault();
+
+					// Update the button text
+					uploadButton.innerHTML = 'Uploading ...';
+					// Get the selected files
+					var files = fileSelect.files;
+					// Create a new FormData object.
+					var formData = new FormData();
+					// Loop through each of the selected files.
+					for( var i = 0; i < files.length; i ++) {
+						var file = files[i];
+						// Check the file type.
+						if( !file.type.match('image.*') ) {
+							alert( 'file type not correct' );
+							continue;
+						}
+
+						// Add the file to the request
+						formData.append('images[]', file, file.name);
+					}
+					console.log('Number of images ready to upload : '+formData.length);
+
+					// Set up the path.
+					var handler_path = "<?php echo LOGINRADIUS_ADV_PLUGIN_URL.'loginradius-custom-interface/assets/server/handler.php'; ?>";
+					console.log( 'Hander path: '+handler_path );
+					// Open the connection.
+
+					if(files.length > 0) {
+						jQuery.ajax( {
+							type: 'POST',
+							url: handler_path,
+							data: formData,
+							xhr: function() {
+								var myXhr = jQuery.ajaxSettings.xhr();
+								return myXhr;
+							},
+							cache: false,
+							contentType: false,
+							processData: false,
+							success: function(data) {
+								alert('yeah');
+								jQuery('#ajax-result').show();
+								jQuery('#ajax-result').html("Images updated successfully");
+							},
+							error: function (xhr, ajaxOptions, thrownError) {
+								jQuery('#ajax-result').show();
+								jQuery('#ajax-result').html('Something wrong, please update images manually <br>');
+								jQuery('#ajax-result').append(xhr+'<br>');
+								jQuery('#ajax-result').append(ajaxOptions+'<br>');
+								jQuery('#ajax-result').append(thrownError);
+							}
+						} );
+					} else {
+						alert( 'Please select uploading images first' );
+					}
+				}
+			});
+	</script>
+</html>
